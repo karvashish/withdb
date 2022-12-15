@@ -1,0 +1,86 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: npm-build-pipeline
+spec:
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: https://github.com/karvashish/withdb.git
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+          
+    - name: install-dependencies
+      params:
+        - name: ARGS
+          value:
+            - clean-install
+      runAfter:
+        - fetch-repository
+      taskRef:
+        kind: ClusterTask
+        name: npm
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+    - name: run-test
+      params:
+        - name: PATH_CONTEXT
+          value: app
+        - name: ARGS
+          value:
+            - test
+      runAfter:
+        - install-dependencies
+      taskRef:
+        kind: ClusterTask
+        name: npm
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: run-build
+      params:
+        - name: PATH_CONTEXT
+          value: app
+        - name: ARGS
+          value:
+            - run-script
+            - build
+      runAfter:
+        - run-test
+      taskRef:
+        kind: ClusterTask
+        name: npm
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: build-push
+      params:
+        - name: IMAGE
+          value: docker.io/kartikeyavashishtha/test123:withdb
+        - name: DOCKERFILE
+          value: Dockerfile
+      runAfter:
+        - run-build
+      taskRef:
+        kind: ClusterTask
+        name: buildah
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+        - name: dockerconfig
+          workspace: docker-credentials
+  workspaces:
+    - name: shared-workspace
+    - name: docker-credentials

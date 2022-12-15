@@ -1,0 +1,8 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: docker-credentials
+data:
+  .dockerconfigjson: >-
+    eyJhdXRocyI6eyJodHRwczovL2luZGV4LmRvY2tlci5pby92MS8iOnsiYXV0aCI6ImEyRnlkR2xyWlhsaGRtRnphR2x6YUhSb1lUcExZWEowYVd0bGVXRkFNVEk9In19LCJjcmVkc1N0b3JlIjoiZGVza3RvcCJ9
+type: kubernetes.io/dockerconfigjson
