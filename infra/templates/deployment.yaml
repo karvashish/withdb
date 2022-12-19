@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-test
+spec:
+  replicas: 1 
+  selector:
+      matchLabels:
+        name: node-test
+  template:
+    metadata:
+      labels:
+        name: node-test
+    spec:
+      containers:
+      - name: node-test-pod
+        image: docker.io/kartikeyavashishtha/test123:withdb
+        imagePullPolicy: Always
+        ports: 
+        - containerPort: 3000
+      imagePullSecrets:
+        - name: docker-credentials
